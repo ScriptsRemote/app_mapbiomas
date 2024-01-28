@@ -1,0 +1,9 @@
+earthengine-api==0.1.386
+geemap==0.30.4
+geopandas==0.14.2
+pandas==1.5.1
+path==16.4.0
+patool==1.12
+plotly==5.8.2
+streamlit==1.30.0
+streamlit-folium==0.18.0
