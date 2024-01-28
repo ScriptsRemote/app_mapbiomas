@@ -106,6 +106,9 @@ palette_list = list(paleta_cores.values())
 st.subheader('Após selecionar o período de interesse, faça o upload de seu GeoJson.')
 uploaded_file = st.file_uploader("Carregar GeoJSON", type=["geojson"])
 
+# Initialize roi as null
+roi = None
+
 def clip(image):
     return image.clip(roi).copyProperties(image, image.propertyNames())
 
