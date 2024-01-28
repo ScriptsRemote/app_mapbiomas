@@ -101,8 +101,6 @@ palette_list = list(paleta_cores.values())
 # m.centerObject(selected_collection,10)
 # m.to_streamlit()
 
-# Initialize roi as null
-roi = None
 
 # Adicione um widget de upload de arquivo no sidebar para permitir ao usuário carregar o GeoJSON
 st.subheader('Após selecionar o período de interesse, faça o upload de seu GeoJson.')
@@ -144,7 +142,7 @@ if selected_dates:
         filtered_collection_year = filtered_collection.filter(ee.Filter.eq('year', year))
         m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
 else:
-    filtered_collection = selected_collection.filter(ee.Filter.eq('year', '2022'))
+    filtered_collection = selected_collection.filter(ee.Filter.eq('year', '2022')) 
     m.addLayer(filtered_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso 2022')
 
 if uploaded_file:
@@ -155,7 +153,7 @@ if uploaded_file:
 for year in selected_dates:
     filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
     m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
-
+    m.centerObject(roi, 12)
     # Adicionar botão de download para o ano atual
     if st.button(f"Download das Imagens para o Ano {year}"):
         out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
@@ -173,7 +171,7 @@ for year in selected_dates:
                 st.sidebar.error(f'Erro durante a exportação da imagem {i+1} para o ano {year}: {str(e)}')
     # Adicionar a camada filtrada ao mapa
     # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
-    m.centerObject(roi, 12)
+   
 
 else:
     m.centerObject(filtered_collection, 6)
