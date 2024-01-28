@@ -149,29 +149,14 @@ if uploaded_file:
     # Filtrar a coleção com base nos anos selecionados
     selected_collection = selected_collection.filter(ee.Filter.inList('year', selected_dates))
 
-# Adicionar camadas aos mapas existentes
-for year in selected_dates:
-    filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
-    m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
-    m.centerObject(roi, 12)
-    # Adicionar botão de download para o ano atual
-    if st.button(f"Download das Imagens para o Ano {year}"):
-        out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+    # Adicionar camadas aos mapas existentes
+    for year in uploaded_file:
+        filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
+        m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
 
-        # Iterar sobre cada imagem na coleção filtrada para o ano atual
-        for i in range(filtered_collection_year.size().getInfo()):
-            # Exportar a imagem atual
-            filename = os.path.join(out_dir, f'image_{year}_{i}.tif')  # Nome do arquivo com um índice único
-            image = ee.Image(filtered_collection_year.toList(filtered_collection_year.size()).get(i))
-
-            try:
-                geemap.ee_export_image(image, filename, scale=10, crs='EPSG:4674', region=roi.geometry())
-                st.sidebar.success(f'Imagem {i+1} para o ano {year} exportada com sucesso.')
-            except Exception as e:
-                st.sidebar.error(f'Erro durante a exportação da imagem {i+1} para o ano {year}: {str(e)}')
     # Adicionar a camada filtrada ao mapa
     # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
-   
+    m.centerObject(roi, 12)
 
 else:
     m.centerObject(filtered_collection, 6)
@@ -294,6 +279,31 @@ if uploaded_file:
         st.subheader("Gráfico de Área (%)")
         st.plotly_chart(fig_pizza)
 
+# #Adicionar botão de download
+# if st.button("Download das Imagens"):
+#     out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+    
+#     # Iterar sobre cada imagem na coleção selecionada
+#     for i in range(selected_collection.size().getInfo()):
+#         # Exportar a imagem atual
+#         filename = os.path.join(out_dir, f'image_{i}.tif')  # Nome do arquivo com um índice único
+#         image = ee.Image(selected_collection.toList(selected_collection.size()).get(i))
+#         geemap.ee_export_image(image.first, filename, scale=10, crs='EPSG:4674', region=roi.geometry())
 
+#         # Verificar se o arquivo foi exportado com sucesso
+#         if os.path.exists(filename):
+#             file_size = os.path.getsize(filename) / (1024 * 1024)  # Tamanho do arquivo em MB
+#             size_limit = 40  # Limite de tamanho (40 MB)
+
+#             if file_size > size_limit:
+#                 # Remover o arquivo grande e exibir uma mensagem de erro
+#                 os.remove(filename)
+#                 st.sidebar.error(f'Imagem {i+1} não foi exportada, tamanho maior que 40 MB.')
+#             else:
+#                 # Exibir mensagem de sucesso
+#                 st.sidebar.success(f'Imagem {i+1} exportada com sucesso.')
+#         else:
+#             # Exibir mensagem de erro se o arquivo não existir
+#             st.sidebar.error(f'Erro durante a exportação da imagem {i+1}. O arquivo não foi criado.')
 
 st.sidebar.markdown('Desenvolvido por [Christhian Cunha](https://www.linkedin.com/in/christhian-santana-cunha/)')
