@@ -279,15 +279,17 @@ if uploaded_file:
         st.subheader("Gráfico de Área (%)")
         st.plotly_chart(fig_pizza)
 
-#Adicionar botão de download
-if st.button("Download das Imagens"):
+# Adicionar botão de download
+if st.button("Download da Imagem"):
     out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
-    
-    # Iterar sobre cada imagem na coleção selecionada
-    for i in range(selected_collection.size().getInfo()):
+
+    # Verificar se já foi feito o download
+    if 'downloaded_image' in st.session_state:
+        st.warning('Só faça o download de uma imagem por vez, reinicie a aplicação')
+    else:
         # Exportar a imagem atual
-        filename = os.path.join(out_dir, f'image_{i}.tif')  # Nome do arquivo com um índice único
-        image = ee.Image(selected_collection.toList(selected_collection.size()).get(i))
+        filename = os.path.join(out_dir, f'image_1.tif')  # Nome do arquivo com um índice único
+        image = ee.Image(selected_collection.first())  # Selecionar a primeira imagem
         geemap.ee_export_image(image, filename, scale=10, crs='EPSG:4674', region=roi.geometry())
 
         # Verificar se o arquivo foi exportado com sucesso
@@ -298,12 +300,14 @@ if st.button("Download das Imagens"):
             if file_size > size_limit:
                 # Remover o arquivo grande e exibir uma mensagem de erro
                 os.remove(filename)
-                st.sidebar.error(f'Imagem {i+1} não foi exportada, tamanho maior que 40 MB.')
+                st.sidebar.error('Imagem não foi exportada, tamanho maior que 40 MB.')
             else:
-                # Exibir mensagem de sucesso
-                st.sidebar.success(f'Imagem {i+1} exportada com sucesso.')
+                # Exibir mensagem de sucesso e marcar que o download foi realizado
+                st.sidebar.success('Imagem exportada com sucesso.')
+                st.session_state.downloaded_image = True
         else:
             # Exibir mensagem de erro se o arquivo não existir
-            st.sidebar.error(f'Erro durante a exportação da imagem {i+1}. O arquivo não foi criado.')
+            st.sidebar.error('Erro durante a exportação da imagem. O arquivo não foi criado.')
+
 
 st.sidebar.markdown('Desenvolvido por [Christhian Cunha](https://www.linkedin.com/in/christhian-santana-cunha/)')
