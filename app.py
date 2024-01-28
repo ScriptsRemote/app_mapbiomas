@@ -101,13 +101,12 @@ palette_list = list(paleta_cores.values())
 # m.centerObject(selected_collection,10)
 # m.to_streamlit()
 
+# Initialize roi as null
+roi = None
 
 # Adicione um widget de upload de arquivo no sidebar para permitir ao usuário carregar o GeoJSON
 st.subheader('Após selecionar o período de interesse, faça o upload de seu GeoJson.')
 uploaded_file = st.file_uploader("Carregar GeoJSON", type=["geojson"])
-
-# Initialize roi as null
-roi = None
 
 def clip(image):
     return image.clip(roi).copyProperties(image, image.propertyNames())
@@ -145,7 +144,7 @@ if selected_dates:
         filtered_collection_year = filtered_collection.filter(ee.Filter.eq('year', year))
         m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
 else:
-    filtered_collection = selected_collection.filter(ee.Filter.eq('year', '2022')) 
+    filtered_collection = selected_collection.filter(ee.Filter.eq('year', '2022'))
     m.addLayer(filtered_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso 2022')
 
 if uploaded_file:
