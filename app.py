@@ -163,24 +163,12 @@ if uploaded_file:
             # Exportar a imagem atual
             filename = os.path.join(out_dir, f'image_{i}.tif')  # Nome do arquivo com um índice único
             image = ee.Image(selected_collection.toList(selected_collection.size()).get(i))
-            geemap.ee_export_image(image, filename, scale=10, crs='EPSG:4674', region=roi.geometry())  # Remova o ".first" aqui
 
-            # Verificar se o arquivo foi exportado com sucesso
-            if os.path.exists(filename):
-                file_size = os.path.getsize(filename) / (1024 * 1024)  # Tamanho do arquivo em MB
-                size_limit = 40  # Limite de tamanho (40 MB)
-
-                if file_size > size_limit:
-                    # Remover o arquivo grande e exibir uma mensagem de erro
-                    os.remove(filename)
-                    st.sidebar.error(f'Imagem {i+1} não foi exportada, tamanho maior que 40 MB.')
-                else:
-                    # Exibir mensagem de sucesso
-                    st.sidebar.success(f'Imagem {i+1} exportada com sucesso.')
-            else:
-                # Exibir mensagem de erro se o arquivo não existir
-                st.sidebar.error(f'Erro durante a exportação da imagem {i+1}. O arquivo não foi criado.')    
-
+            try:
+                geemap.ee_export_image(image, filename, scale=10, crs='EPSG:4674', region=roi.geometry())
+                st.sidebar.success(f'Imagem {i+1} exportada com sucesso.')
+            except Exception as e:
+                st.sidebar.error(f'Erro durante a exportação da imagem {i+1}: {str(e)}')
     # Adicionar a camada filtrada ao mapa
     # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
     m.centerObject(roi, 12)
