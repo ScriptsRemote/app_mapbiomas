@@ -154,21 +154,21 @@ if uploaded_file:
         filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
         m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
 
-    # Adicionar botão de download
-    if st.button("Download das Imagens"):
+    # Adicionar botão de download para o ano atual
+    if st.button(f"Download das Imagens para o Ano {year}"):
         out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
 
-        # Iterar sobre cada imagem na coleção selecionada
-        for i in range(selected_collection.size().getInfo()):
+        # Iterar sobre cada imagem na coleção filtrada para o ano atual
+        for i in range(filtered_collection_year.size().getInfo()):
             # Exportar a imagem atual
-            filename = os.path.join(out_dir, f'image_{i}.tif')  # Nome do arquivo com um índice único
-            image = ee.Image(selected_collection.toList(selected_collection.size()).get(i))
+            filename = os.path.join(out_dir, f'image_{year}_{i}.tif')  # Nome do arquivo com um índice único
+            image = ee.Image(filtered_collection_year.toList(filtered_collection_year.size()).get(i))
 
             try:
                 geemap.ee_export_image(image, filename, scale=10, crs='EPSG:4674', region=roi.geometry())
-                st.sidebar.success(f'Imagem {i+1} exportada com sucesso.')
+                st.sidebar.success(f'Imagem {i+1} para o ano {year} exportada com sucesso.')
             except Exception as e:
-                st.sidebar.error(f'Erro durante a exportação da imagem {i+1}: {str(e)}')
+                   st.sidebar.error(f'Erro durante a exportação da imagem {i+1} para o ano {year}: {str(e)}')
     # Adicionar a camada filtrada ao mapa
     # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
     m.centerObject(roi, 12)
