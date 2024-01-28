@@ -149,10 +149,10 @@ if uploaded_file:
     # Filtrar a coleção com base nos anos selecionados
     selected_collection = selected_collection.filter(ee.Filter.inList('year', selected_dates))
 
-    # Adicionar camadas aos mapas existentes
-    for year in uploaded_file:
-        filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
-        m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
+# Adicionar camadas aos mapas existentes
+for year in selected_dates:
+    filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
+    m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
 
     # Adicionar botão de download para o ano atual
     if st.button(f"Download das Imagens para o Ano {year}"):
@@ -168,7 +168,7 @@ if uploaded_file:
                 geemap.ee_export_image(image, filename, scale=10, crs='EPSG:4674', region=roi.geometry())
                 st.sidebar.success(f'Imagem {i+1} para o ano {year} exportada com sucesso.')
             except Exception as e:
-                   st.sidebar.error(f'Erro durante a exportação da imagem {i+1} para o ano {year}: {str(e)}')
+                st.sidebar.error(f'Erro durante a exportação da imagem {i+1} para o ano {year}: {str(e)}')
     # Adicionar a camada filtrada ao mapa
     # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
     m.centerObject(roi, 12)
