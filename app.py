@@ -159,7 +159,7 @@ if selected_dates:
     # Button to trigger data download
     if st.button("Download Data"):
         out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
-        filename = os.path.join(out_dir, f'image_{year}.tif')
+        filename = os.path.join(out_dir, 'image.tif')
         export_image(selected_collection.first(), filename)
      
 else:
