@@ -39,6 +39,8 @@ st.sidebar.markdown("""
     ---
 """)
 
+
+
 ##Autenticação
 @st.cache_data
 def m():
@@ -112,11 +114,10 @@ palette_list = list(paleta_cores.values())
 st.subheader('Após selecionar o período de interesse, faça o upload de seu GeoJson.')
 uploaded_file = st.file_uploader("Carregar GeoJSON", type=["geojson"])
 
+
 def clip(image):
     return image.clip(roi).copyProperties(image, image.propertyNames())
 
-
-# Verifique se um arquivo foi carregado
 if uploaded_file is not None:
     ##Carregando o arquivo json
     f_json = json.load(uploaded_file)
@@ -124,29 +125,50 @@ if uploaded_file is not None:
     f_json = f_json['features']
     # Converte de GeoDataFrame para JSON
     # Necessário para autenticação do código via GEE
-    st.write("Arquivo GeoJSON carregado com sucesso!")
+    st.sidebar.write("Arquivo GeoJSON carregado com sucesso!")
     # Carrega a FeatureCollection no Earth Engine
     roi = ee.FeatureCollection(f_json)
-
     # Adicione a área de estudo ao mapa
     m.addLayer(roi, {}, 'Área de Estudo')
-
     # Recorta a coleção com base na área de interesse (ROI)
     selected_collection = selected_collection.map(clip)
-
     # Centralize o mapa na área de estudo
     m.centerObject(roi)
 else:
     selected_collection = collection_with_year
  
-# Verificar se outros anos foram selecionados e atualizar o mapa
+
+# Adiciona a ROI se ela existir
 if selected_dates:
-    # Filtrar a coleção com base nos anos selecionados
     filtered_collection = selected_collection.filter(ee.Filter.inList('year', selected_dates))
     # Adicionar a camada filtrada ao mapa
     for year in selected_dates:
         filtered_collection_year = filtered_collection.filter(ee.Filter.eq('year', year))
         m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
+        # Define the output directory for downloaded data
+    out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+
+    # Função para exportar a imagem para um arquivo GeoTIFF
+    def export_image(image, filename):
+        try:
+            geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674', region=roi.geometry())
+            st.success(f"Imagem exportada com sucesso: {filename}")
+        except Exception as e:
+            st.error(f"Erro ao exportar a imagem: {str(e)}")
+
+    # Button to trigger data download
+    if st.button("Download Data"):
+        # Verifica se a ROI está definida
+        if 'roi' in locals():
+            # Exporta a coleção selecionada para arquivos GeoTIFF
+            for year in selected_dates:
+                # Filtra a coleção para o ano selecionado
+                selected_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
+                # Exporta a primeira imagem na coleção filtrada
+                filename = os.path.join(out_dir, f'image_{year}.tif')
+                export_image(selected_collection_year.first(), filename)
+        else:
+            st.warning("Por favor, faça o upload de um arquivo GeoJSON para definir a região de interesse.")
 else:
     filtered_collection = selected_collection.filter(ee.Filter.eq('year', '2022')) 
     m.addLayer(filtered_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso 2022')
@@ -155,64 +177,19 @@ if uploaded_file:
     # Filtrar a coleção com base nos anos selecionados
     selected_collection = selected_collection.filter(ee.Filter.inList('year', selected_dates))
 
-    # Adicionar camadas aos mapas existentes
+        # Adicionar camadas aos mapas existentes
     for year in uploaded_file:
         filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
         m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
-
-        
-    # Define the output directory for downloaded data
-    out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
-
-        # Function to export the image to a GeoTIFF file
-    def export_image(image, filename):
-        geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674',region=roi.geometry())
-
-        # Button to trigger data download
-    if st.button("Download Data"):
-            
-        # Check if the ROI is defined
-            if 'roi' in locals():
-                image = ee.Image(selected_collection.first())
-                    # Export the first image in the filtered collection
-                filename = os.path.join(out_dir, f'image_{year}.tif')
-                export_image(image, filename)
-
-                st.success("Data downloaded successfully!") 
-
-            else:
-                st.warning("Please upload a GeoJSON file to define the region of interest.")
-
-
-    # Adicionar a camada filtrada ao mapa
-    # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
-    m.centerObject(roi, 12)
-
+         # Adicionar a camada filtrada ao mapa
+        # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
+        m.centerObject(roi, 12)
 else:
     m.centerObject(filtered_collection, 6)
-
+            
 # Renderizar o mapa no Streamlit
 m.to_streamlit()
-
-
-
 st.divider()
-st.sidebar.markdown("""
-    ## Sobre a AmbGEO
-    
-    Somos uma empresa que ensina geoprocessamento e sensoriamento remoto de maneira totalmente prática, alinhada às demandas da área acadêmica e mercado de trabalho. Atualmente, a AmbGEO conta com mais de 1 mil alunos ativos.
-    
-    ---
-    
-    Acesse nossa página e saiba mais [aqui](https://ambgeo.com/).
-""")
-
-# Quantas imagens na coleção
-count = collection_with_year.size().getInfo()
-
-# Lista de anos
-year_list = df_col["Ano"].tolist()
-
 # Verifica se um arquivo foi carregado
 if uploaded_file:
     # DataFrame para armazenar os resultados
@@ -309,6 +286,19 @@ if uploaded_file:
     with col2:
         st.subheader("Gráfico de Área (%)")
         st.plotly_chart(fig_pizza)
+
+
+
+st.sidebar.markdown("""
+    ## Sobre a AmbGEO
+    
+    Somos uma empresa que ensina geoprocessamento e sensoriamento remoto de maneira totalmente prática, alinhada às demandas da área acadêmica e mercado de trabalho. Atualmente, a AmbGEO conta com mais de 1 mil alunos ativos.
+    
+    ---
+    
+    Acesse nossa página e saiba mais [aqui](https://ambgeo.com/).
+""")
+
 
 
 st.sidebar.markdown('Desenvolvido por [Christhian Cunha](https://www.linkedin.com/in/christhian-santana-cunha/)')
