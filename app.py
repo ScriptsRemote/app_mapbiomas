@@ -175,7 +175,7 @@ out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
 
 # Function to export the image to a GeoTIFF file
 def export_image(image, filename):
-    geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674', region=roi.geometry())
+    geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674')
 
 # Button to trigger data download
 if st.button("Download Data"):
