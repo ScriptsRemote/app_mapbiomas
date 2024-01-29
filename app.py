@@ -148,11 +148,11 @@ if selected_dates:
         # Define the output directory for downloaded data
    
    # Função para exportar a imagem para um arquivo GeoTIFF
-    def export_image(image, filename):
+    def export_image(image, name):
         try:
             # Exporta a imagem diretamente para o ambiente de deploy
-            url = image.getDownloadURL({'scale': 30, 'crs': 'EPSG:4674', 'region': roi.geometry().getInfo()})
-            st.success(f"Imagem exportada com sucesso. Baixe [aqui]({url}).")
+            url = image.getDownloadURL({'name':f'classification_{year}','scale': 30, 'crs': 'EPSG:4674', 'region': roi.geometry().getInfo()})
+            st.success(f"Imagem exportada de {year} com sucesso. Baixe [aqui]({url}).")
         except Exception as e:
             st.error(f"Erro ao exportar a imagem: {str(e)}")
     # Botão para acionar o download dos dados
@@ -164,8 +164,8 @@ if selected_dates:
                 # Filtra a coleção para o ano selecionado
                 selected_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
                 # Exporta a primeira imagem na coleção filtrada
-                filename = f'image_{year}.tif'
-                export_image(selected_collection_year.first(), filename)
+                name = f'image_{year}.tif'
+                export_image(selected_collection_year.first(), name)
         else:
             st.warning("Por favor, selecione uma área de interesse antes de fazer o download.")
 
