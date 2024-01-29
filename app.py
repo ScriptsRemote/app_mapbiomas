@@ -170,6 +170,31 @@ else:
 # Renderizar o mapa no Streamlit
 m.to_streamlit()
 
+# Define the output directory for downloaded data
+out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+
+# Function to export the image to a GeoTIFF file
+def export_image(image, filename):
+    geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674', region=roi.geometry())
+
+# Button to trigger data download
+if st.button("Download Data"):
+    # Check if the ROI is defined
+    if 'roi' in locals():
+        # Export the selected collection to GeoTIFF
+        for year in selected_dates:
+            # Filter the collection for the selected year
+            selected_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
+            # Export the first image in the filtered collection
+            filename = os.path.join(out_dir, f'image_{year}.tif')
+            export_image(selected_collection_year.first(), filename)
+
+        st.success("Data downloaded successfully!")
+
+    else:
+        st.warning("Please upload a GeoJSON file to define the region of interest.")
+
+
 
 st.divider()
 st.sidebar.markdown("""
@@ -285,61 +310,5 @@ if uploaded_file:
         st.subheader("Gráfico de Área (%)")
         st.plotly_chart(fig_pizza)
 
-# # #Adicionar botão de download
-# # if st.button("Download das Imagens"):
-#         # Certifique-se de que uma região de interesse foi carregada
-#         if 'roi' not in locals():
-#         st.warning("Por favor, carregue uma região de interesse antes de exportar as imagens.")
-# #     out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
-    
-# #     # Iterar sobre cada imagem na coleção selecionada
-# #     for i in range(selected_collection.size().getInfo()):
-# #         # Exportar a imagem atual
-# #         filename = os.path.join(out_dir, f'image_{i}.tif')  # Nome do arquivo com um índice único
-# #         image = ee.Image(selected_collection.toList(selected_collection.size()).get(i))
-# #         geemap.ee_export_image(image.first, filename, scale=10, crs='EPSG:4674', region=roi.geometry())
-
-# #         # Verificar se o arquivo foi exportado com sucesso
-# #         if os.path.exists(filename):
-# #             file_size = os.path.getsize(filename) / (1024 * 1024)  # Tamanho do arquivo em MB
-# #             size_limit = 40  # Limite de tamanho (40 MB)
-
-# #             if file_size > size_limit:
-# #                 # Remover o arquivo grande e exibir uma mensagem de erro
-# #                 os.remove(filename)
-# #                 st.sidebar.error(f'Imagem {i+1} não foi exportada, tamanho maior que 40 MB.')
-# #             else:
-# #                 # Exibir mensagem de sucesso
-# #                 st.sidebar.success(f'Imagem {i+1} exportada com sucesso.')
-# #         else:
-# #             # Exibir mensagem de erro se o arquivo não existir
-# #             st.sidebar.error(f'Erro durante a exportação da imagem {i+1}. O arquivo não foi criado.')
-#         # Adicione um botão para exportar imagens
-# Adicionar um botão para exportar imagens
-if st.button("Exportar Imagens Selecionadas"):
-    # Certifique-se de que uma região de interesse foi carregada
-    if uploaded_file:
-        # Itere sobre as imagens selecionadas e exporte cada uma
-        for year in selected_dates:
-            out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
-            # Filtrar a coleção com base no ano
-            filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
-
-            # Iterar sobre cada imagem na coleção filtrada e exportar
-            for i in range(filtered_collection_year.size().getInfo()):
-                # Exportar a imagem atual
-                filename = os.path.join(out_dir, f'image_{year}_{i + 1}.tif')  # Nome do arquivo com um índice único
-                image = ee.Image(filtered_collection_year.toList(filtered_collection_year.size()).get(i))
-                
-                # Exportar a imagem usando geemap.ee_export_image
-                geemap.ee_export_image(image, filename=filename, scale=30)
-                
-                # Verificar se o arquivo foi exportado com sucesso
-                if os.path.exists(filename):
-                    st.success(f'Imagem para o ano {year}, índice {i + 1} exportada com sucesso como {filename}.')
-                else:
-                    st.error(f'Erro durante a exportação da imagem para o ano {year}, índice {i + 1}.')
-    else:
-        st.warning("Por favor, carregue uma região de interesse antes de exportar as imagens.")
 
 st.sidebar.markdown('Desenvolvido por [Christhian Cunha](https://www.linkedin.com/in/christhian-santana-cunha/)')
