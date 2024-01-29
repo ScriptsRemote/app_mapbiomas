@@ -162,11 +162,9 @@ if selected_dates:
         if 'roi' in locals():
             # Exporta a coleção selecionada para arquivos GeoTIFF
             for year in selected_dates:
-                # Filtra a coleção para o ano selecionado
-                selected_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
                 # Exporta a primeira imagem na coleção filtrada
                 filename = os.path.join(out_dir, f'image_{year}.tif')
-                export_image(selected_collection_year.first(), filename)
+                export_image(selected_collection.first(), filename)
         else:
             st.warning("Por favor, faça o upload de um arquivo GeoJSON para definir a região de interesse.")
 else:
