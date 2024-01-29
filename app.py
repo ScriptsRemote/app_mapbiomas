@@ -180,7 +180,7 @@ if uploaded_file:
                     filename = os.path.join(out_dir, f'image_{year}.tif')
                     export_image(selected_collection_year.first(), filename)
 
-                st.success("Data downloaded successfully!")
+                st.success("Data downloaded successfully!") 
 
             else:
                 st.warning("Please upload a GeoJSON file to define the region of interest.")
