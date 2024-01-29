@@ -160,6 +160,32 @@ if uploaded_file:
         filtered_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
         m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
 
+        
+    # Define the output directory for downloaded data
+    out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+
+        # Function to export the image to a GeoTIFF file
+    def export_image(image, filename):
+        geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674',region=roi.geometry())
+
+        # Button to trigger data download
+    if st.button("Download Data"):
+        # Check if the ROI is defined
+            if 'roi' in locals():
+            # Export the selected collection to GeoTIFF
+                for year in selected_dates:
+                 # Filter the collection for the selected year
+                    selected_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
+                    # Export the first image in the filtered collection
+                    filename = os.path.join(out_dir, f'image_{year}.tif')
+                    export_image(selected_collection_year.first(), filename)
+
+                st.success("Data downloaded successfully!")
+
+            else:
+                st.warning("Please upload a GeoJSON file to define the region of interest.")
+
+
     # Adicionar a camada filtrada ao mapa
     # m.addLayer(selected_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {selected_dates}')
     m.centerObject(roi, 12)
@@ -169,30 +195,6 @@ else:
 
 # Renderizar o mapa no Streamlit
 m.to_streamlit()
-
-# Define the output directory for downloaded data
-out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
-
-# Function to export the image to a GeoTIFF file
-def export_image(image, filename):
-    geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674')
-
-# Button to trigger data download
-if st.button("Download Data"):
-    # Check if the ROI is defined
-    if 'roi' in locals():
-        # Export the selected collection to GeoTIFF
-        for year in selected_dates:
-            # Filter the collection for the selected year
-            selected_collection_year = selected_collection.filter(ee.Filter.eq('year', year))
-            # Export the first image in the filtered collection
-            filename = os.path.join(out_dir, f'image_{year}.tif')
-            export_image(selected_collection_year.first(), filename)
-
-        st.success("Data downloaded successfully!")
-
-    else:
-        st.warning("Please upload a GeoJSON file to define the region of interest.")
 
 
 
