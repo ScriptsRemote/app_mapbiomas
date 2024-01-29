@@ -318,9 +318,7 @@ if uploaded_file:
 # Adicionar um botão para exportar imagens
 if st.button("Exportar Imagens Selecionadas"):
     # Certifique-se de que uma região de interesse foi carregada
-    if 'roi' not in locals():
-        st.warning("Por favor, carregue uma região de interesse antes de exportar as imagens.")
-    else:
+    if uploaded_file:
         # Itere sobre as imagens selecionadas e exporte cada uma
         for year in selected_dates:
             out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
@@ -334,13 +332,14 @@ if st.button("Exportar Imagens Selecionadas"):
                 image = ee.Image(filtered_collection_year.toList(filtered_collection_year.size()).get(i))
                 
                 # Exportar a imagem usando geemap.ee_export_image
-                geemap.ee_export_image(image, filename=filename, scale=30)
+                geemap.ee_export_image(image, filename=filename, scale=30, region=roi.geometry())
                 
                 # Verificar se o arquivo foi exportado com sucesso
                 if os.path.exists(filename):
                     st.success(f'Imagem para o ano {year}, índice {i + 1} exportada com sucesso como {filename}.')
                 else:
                     st.error(f'Erro durante a exportação da imagem para o ano {year}, índice {i + 1}.')
-
+    else:
+        st.warning("Por favor, carregue uma região de interesse antes de exportar as imagens.")
 
 st.sidebar.markdown('Desenvolvido por [Christhian Cunha](https://www.linkedin.com/in/christhian-santana-cunha/)')
