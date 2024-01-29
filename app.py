@@ -146,18 +146,19 @@ if selected_dates:
         filtered_collection_year = filtered_collection.filter(ee.Filter.eq('year', year))
         m.addLayer(filtered_collection_year, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso {year}')
         # Define the output directory for downloaded data
-    out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+   
 
     # Função para exportar a imagem para um arquivo GeoTIFF
     def export_image(image, filename):
         try:
-            geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674')
+            geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674', region=roi.geometry())
             st.success(f"Imagem exportada com sucesso: {filename}")
         except Exception as e:
             st.error(f"Erro ao exportar a imagem: {str(e)}")
 
     # Button to trigger data download
     if st.button("Download Data"):
+        out_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
         filename = os.path.join(out_dir, f'image_{year}.tif')
         export_image(selected_collection.first(), filename)
      
