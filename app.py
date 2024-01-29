@@ -166,21 +166,17 @@ if uploaded_file:
 
         # Function to export the image to a GeoTIFF file
     def export_image(image, filename):
-        geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674')
+        geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674',region=roi.geometry())
 
         # Button to trigger data download
     if st.button("Download Data"):
             
         # Check if the ROI is defined
             if 'roi' in locals():
-            # Export the selected collection to GeoTIFF
-                for i in range(len(selected_dates)):
-                 # Filter the collection for the selected year
-                     # Obtém a imagem da coleção
-                    image = ee.Image(filtered_collection.toList(filtered_collection.size()).get(i)).clip(roi.geometry().buffer(1))
+                image = ee.Image(selected_collection.first())
                     # Export the first image in the filtered collection
-                    filename = os.path.join(out_dir, f'image_{year}.tif')
-                    export_image(image, filename)
+                filename = os.path.join(out_dir, f'image_{year}.tif')
+                export_image(image, filename)
 
                 st.success("Data downloaded successfully!") 
 
