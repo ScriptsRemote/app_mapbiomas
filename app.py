@@ -151,7 +151,7 @@ if selected_dates:
     # Função para exportar a imagem para um arquivo GeoTIFF
     def export_image(image, filename):
         try:
-            geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674', region=roi.geometry())
+            geemap.ee_export_image(image, filename, scale=30, crs='EPSG:4674')
             st.success(f"Imagem exportada com sucesso: {filename}")
         except Exception as e:
             st.error(f"Erro ao exportar a imagem: {str(e)}")
