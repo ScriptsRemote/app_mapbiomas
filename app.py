@@ -158,15 +158,9 @@ if selected_dates:
 
     # Button to trigger data download
     if st.button("Download Data"):
-        # Verifica se a ROI está definida
-        if 'roi' in locals():
-            # Exporta a coleção selecionada para arquivos GeoTIFF
-            for year in selected_dates:
-                # Exporta a primeira imagem na coleção filtrada
-                filename = os.path.join(out_dir, f'image_{year}.tif')
-                export_image(selected_collection.first(), filename)
-        else:
-            st.warning("Por favor, faça o upload de um arquivo GeoJSON para definir a região de interesse.")
+        filename = os.path.join(out_dir, f'image_{year}.tif')
+        export_image(selected_collection.first(), filename)
+     
 else:
     filtered_collection = selected_collection.filter(ee.Filter.eq('year', '2022')) 
     m.addLayer(filtered_collection, {'palette': palette_list, 'min': 0, 'max': 62}, f'Mapas de uso 2022')
