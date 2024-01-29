@@ -332,7 +332,7 @@ if st.button("Exportar Imagens Selecionadas"):
                 image = ee.Image(filtered_collection_year.toList(filtered_collection_year.size()).get(i))
                 
                 # Exportar a imagem usando geemap.ee_export_image
-                geemap.ee_export_image(image, filename=filename, scale=30, region=roi.geometry())
+                geemap.ee_export_image(image, filename=filename, scale=30)
                 
                 # Verificar se o arquivo foi exportado com sucesso
                 if os.path.exists(filename):
